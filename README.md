@@ -1,61 +1,90 @@
-# SizeFolder GUI (PharmApp Themed)
+# SizeFolder GUI (PharmApp themed)
 
-A cross-platform Tkinter desktop utility that scans the **immediate subfolders** under a chosen root folder and computes total size per subfolder, with **threaded scanning**, **cancellation**, **live progress**, **filtering**, **sortable columns**, and **CSV export**. fileciteturn0file0L1-L9
+A lightweight, cross‑platform desktop utility to scan the **immediate subfolders** of a chosen root directory and compute their total sizes. It is designed for fast folder triage (find what is consuming disk space), with **threaded scanning**, **stop/cancel**, **filtering**, **sortable columns**, and **CSV export**.
 
-## Features
+## Key features
 
-- Scan immediate subfolders and compute total sizes (bytes + human-readable). fileciteturn0file0L1-L9  
-- Threaded scanning with **Stop** (cancellable). fileciteturn0file0L1-L9  
-- **Exclude patterns** (glob, comma-separated): e.g., `.git,node_modules,__pycache__`. fileciteturn0file0L169-L179  
-- **Max depth** control (limit recursion). fileciteturn0file0L62-L80  
-- Optional **hardlink de-duplication** (avoid double-counting). fileciteturn0file0L62-L80  
-- Sortable columns (click header to toggle ▲/▼). fileciteturn0file0L9-L9  
-- Inline **filter box** (search by folder name or path). fileciteturn0file0L190-L195  
-- Context menu: open folder, reveal in file manager, copy path. fileciteturn0file0L219-L239  
-- CSV export (`folder, bytes, human_readable, absolute_path`). fileciteturn0file0L311-L327  
-- Windows long-path handling (`\\?\\` prefix). fileciteturn0file0L36-L47  
+- Scans **immediate subfolders** under a selected *Root* folder
+- Computes sizes recursively with configurable **Max depth**
+- **Threaded** I/O scanning (configurable worker threads)
+- **Stop** button (Esc) for cancellable runs
+- **Exclude patterns** (glob, comma-separated) such as `.git`, `node_modules`, `__pycache__`
+- **Filter** box for quick search in results
+- **Sortable columns** (click headers to toggle ▲/▼)
+- **Top‑N** view (show only the largest N subfolders)
+- **CSV export** (`folder, bytes, human_readable, absolute_path`)
+- Cross‑platform: Windows / macOS / Linux (Tkinter)
+
+## Screenshots
+
+Add screenshots here (recommended):
+- `./docs/screenshot_scan.png`
+- `./docs/screenshot_help.png`
 
 ## Requirements
 
-- Python 3.9+ (recommended)
-- No external dependencies (standard library only)
+- Python **3.8+**
+- Tkinter (bundled with most Python installers; on some Linux distros you may need to install it separately)
 
-## Run
+No third‑party Python packages are required.
+
+## Quick start
+
+### 1) Run from source
 
 ```bash
 python size_folder_gui_gui_v1.py
 ```
 
-> The app launches a GUI window. Choose a root folder, then click **Scan**.
+If you prefer, rename the script to `size_folder_gui.py` and run:
 
-## Keyboard Shortcuts
+```bash
+python size_folder_gui.py
+```
 
-- **Ctrl/⌘ + O**: Browse root folder fileciteturn0file0L141-L149  
-- **Ctrl/⌘ + R**: Start scan fileciteturn0file0L141-L149  
-- **Ctrl/⌘ + S**: Save CSV fileciteturn0file0L141-L149  
-- **Ctrl/⌘ + F**: Focus filter box fileciteturn0file0L141-L149  
-- **F1**: Open Help tab fileciteturn0file0L141-L149  
-- **Esc**: Stop scan fileciteturn0file0L141-L149  
+### 2) Use the app
 
-## How it Works
+1. Choose a **Root** folder
+2. Adjust options if needed:
+   - **Exclude**: glob patterns (comma-separated)
+   - **Max depth**: recursion depth (0 = only root; 1 = children; 2 = grandchildren; etc.)
+   - **Threads**: parallel workers
+   - **Top‑N**: show only the largest N results (0 = show all)
+   - **De‑dupe hardlinks**: avoids counting hardlinked files multiple times
+3. Click **Scan**
+4. Optionally **Save CSV**
 
-1. Lists immediate subfolders of the selected root. fileciteturn0file0L50-L60  
-2. Computes each subfolder size recursively using `os.scandir()` (no symlink following). fileciteturn0file0L62-L114  
-3. Runs size computations in parallel using a `ThreadPoolExecutor`. fileciteturn0file0L344-L387  
-4. Streams progress/results back to the GUI via a thread-safe queue. fileciteturn0file0L284-L309  
+## Keyboard shortcuts
 
-## CSV Output
+- **Ctrl/⌘ + O**: Browse root folder
+- **Ctrl/⌘ + R**: Start scan
+- **Ctrl/⌘ + S**: Save CSV
+- **Ctrl/⌘ + F**: Focus filter box
+- **F1**: Help tab
+- **Esc**: Stop scan
 
-CSV columns (in this order): fileciteturn0file0L311-L327
+## Output and interpretation
 
-- `folder`
-- `bytes`
-- `human_readable`
-- `absolute_path`
+- **Bytes** is the logical file size (`st_size`), not necessarily allocated size on disk.
+- On Windows, the tool internally applies the `\\?\` prefix to better support very long paths.
+- Symlinks are not followed.
 
-## Packaging (PyInstaller)
+## CSV export format
 
-### Windows (EXE)
+The exported CSV contains:
+
+| Column | Description |
+|---|---|
+| `folder` | Subfolder name (basename) |
+| `bytes` | Total size in bytes |
+| `human_readable` | Formatted size (KB/MB/GB/...) |
+| `absolute_path` | Full path of the subfolder |
+
+## Build standalone executables (PyInstaller)
+
+> Optional. Only needed if you want a packaged app.
+
+### Windows (one‑file EXE)
 
 ```powershell
 py -3 -m pip install pyinstaller
@@ -66,33 +95,30 @@ py -3 -m PyInstaller --noconfirm --clean --onefile --windowed `
   size_folder_gui_gui_v1.py
 ```
 
-### macOS (.app)
+### macOS (.app bundle)
 
 ```bash
 python3 -m pip install pyinstaller
-python3 -m PyInstaller --noconfirm --clean --windowed --name SizeFolderGUI \
+python3 -m PyInstaller --noconfirm --clean --windowed \
+  --name SizeFolderGUI \
   --icon ./nct_logo.icns \
   --add-data "nct_logo.png:." \
   size_folder_gui_gui_v1.py
 ```
 
-## Branding
+Notes:
+- On macOS, Gatekeeper may block the first run; use right‑click → Open.
+- For distribution, consider code signing and notarization.
 
-- Runtime window icon: `nct_logo.png` fileciteturn0file0L23-L35  
-- Theme colors are defined in constants near the top of the file. fileciteturn0file0L17-L28  
+## Project links
 
-### Website
-
-The official project website is: **www.pharmapp.dev**.
-
-If you want the in-app footer to match, update the footer string in the code:
-
-- `self.var_footer = "... | www.pharmapp.dev"` (in the Scan tab footer). fileciteturn0file0L254-L258  
+- Product / demo: **www.pharmapp.dev**
+- Articles & documentation: **www.nghiencuuthuoc.com**
 
 ## License
 
-Choose a license for your repository (e.g., MIT). If you haven’t decided yet, add a `LICENSE` file later.
+Choose one:
+- MIT (recommended for open source utilities), or
+- Proprietary / internal use only
 
----
-
-© 2026 | PharmApp | www.pharmapp.dev | www.nghiencuuthuoc.com
+If you select MIT, add a `LICENSE` file at the repo root.

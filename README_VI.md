@@ -1,61 +1,90 @@
-# SizeFolder GUI (PharmApp Theme)
+# SizeFolder GUI (PharmApp themed)
 
-Ứng dụng desktop Tkinter đa nền tảng giúp quét **các thư mục con cấp 1** dưới một thư mục gốc và tính tổng dung lượng cho từng thư mục con, có **đa luồng**, **dừng (Stop)**, **tiến trình realtime**, **lọc**, **sắp xếp cột**, và **xuất CSV**. fileciteturn0file0L1-L9
+Một tiện ích desktop nhẹ, đa nền tảng để quét **các thư mục con cấp 1** (immediate subfolders) của một thư mục gốc và tính **tổng dung lượng** của từng thư mục con. Công cụ phù hợp để “triage” nhanh ổ đĩa (xác định thư mục nào đang chiếm dung lượng), với **quét đa luồng**, **dừng/huỷ**, **lọc**, **sắp xếp cột**, và **xuất CSV**.
 
-## Tính năng
+## Tính năng chính
 
-- Quét các thư mục con cấp 1 và tính tổng dung lượng (bytes + hiển thị dễ đọc). fileciteturn0file0L1-L9  
-- Quét đa luồng, có nút **Stop** để dừng giữa chừng. fileciteturn0file0L1-L9  
-- **Exclude patterns** theo glob, nhập dạng danh sách phân tách dấu phẩy: ví dụ `.git,node_modules,__pycache__`. fileciteturn0file0L169-L179  
-- Tuỳ chọn **Max depth** để giới hạn độ sâu quét. fileciteturn0file0L62-L80  
-- Tuỳ chọn **De-dupe hardlinks** để tránh đếm trùng file hardlink. fileciteturn0file0L62-L80  
-- Sắp xếp tất cả cột (bấm tiêu đề để đảo chiều ▲/▼). fileciteturn0file0L9-L9  
-- Ô **Filter** để lọc theo tên thư mục hoặc đường dẫn. fileciteturn0file0L190-L195  
-- Menu chuột phải: mở thư mục, reveal trong file manager, copy path. fileciteturn0file0L219-L239  
-- Xuất CSV (`folder, bytes, human_readable, absolute_path`). fileciteturn0file0L311-L327  
-- Hỗ trợ đường dẫn dài trên Windows bằng tiền tố `\\?\\`. fileciteturn0file0L36-L47  
+- Quét **thư mục con cấp 1** dưới thư mục *Root* đã chọn
+- Tính dung lượng đệ quy với tuỳ chọn **Max depth**
+- Quét I/O **đa luồng** (tuỳ chỉnh số luồng)
+- Nút **Stop** (Esc) để dừng tác vụ đang chạy
+- **Exclude patterns** (glob, phân tách bằng dấu phẩy): `.git`, `node_modules`, `__pycache__`, ...
+- Ô **Filter** để tìm nhanh trong kết quả
+- **Sắp xếp theo cột** (bấm tiêu đề cột để đảo ▲/▼)
+- Chế độ **Top‑N** (chỉ hiển thị N thư mục lớn nhất)
+- **Xuất CSV** (`folder, bytes, human_readable, absolute_path`)
+- Đa nền tảng: Windows / macOS / Linux (Tkinter)
+
+## Ảnh minh hoạ
+
+Nên bổ sung ảnh chụp màn hình:
+- `./docs/screenshot_scan.png`
+- `./docs/screenshot_help.png`
 
 ## Yêu cầu
 
-- Python 3.9+ (khuyến nghị)
-- Không cần thư viện ngoài (chỉ dùng standard library)
+- Python **3.8+**
+- Tkinter (thường có sẵn trong bộ cài Python; một số bản Linux cần cài thêm)
 
-## Chạy chương trình
+Không cần thư viện Python bên thứ ba.
+
+## Chạy nhanh
+
+### 1) Chạy từ mã nguồn
 
 ```bash
 python size_folder_gui_gui_v1.py
 ```
 
-> Ứng dụng sẽ mở GUI. Chọn thư mục gốc, sau đó bấm **Scan**.
+Bạn có thể đổi tên file thành `size_folder_gui.py` rồi chạy:
+
+```bash
+python size_folder_gui.py
+```
+
+### 2) Cách dùng
+
+1. Chọn thư mục **Root**
+2. Điều chỉnh tuỳ chọn (nếu cần):
+   - **Exclude**: mẫu glob, phân tách bằng dấu phẩy
+   - **Max depth**: độ sâu đệ quy (0 = chỉ root; 1 = con; 2 = cháu; ...)
+   - **Threads**: số worker chạy song song
+   - **Top‑N**: chỉ hiển thị N kết quả lớn nhất (0 = hiển thị tất cả)
+   - **De‑dupe hardlinks**: tránh đếm trùng file hardlink
+3. Bấm **Scan**
+4. (Tuỳ chọn) bấm **Save CSV**
 
 ## Phím tắt
 
-- **Ctrl/⌘ + O**: Chọn thư mục gốc fileciteturn0file0L141-L149  
-- **Ctrl/⌘ + R**: Bắt đầu quét fileciteturn0file0L141-L149  
-- **Ctrl/⌘ + S**: Lưu CSV fileciteturn0file0L141-L149  
-- **Ctrl/⌘ + F**: Focus ô Filter fileciteturn0file0L141-L149  
-- **F1**: Mở tab Help fileciteturn0file0L141-L149  
-- **Esc**: Dừng quét fileciteturn0file0L141-L149  
+- **Ctrl/⌘ + O**: Chọn thư mục root
+- **Ctrl/⌘ + R**: Bắt đầu quét
+- **Ctrl/⌘ + S**: Lưu CSV
+- **Ctrl/⌘ + F**: Focus vào ô Filter
+- **F1**: Chuyển sang tab Help
+- **Esc**: Dừng quét
 
-## Cơ chế hoạt động
+## Giải thích kết quả
 
-1. Liệt kê các thư mục con cấp 1 của thư mục gốc. fileciteturn0file0L50-L60  
-2. Tính dung lượng từng thư mục bằng `os.scandir()` (không theo symlink). fileciteturn0file0L62-L114  
-3. Chạy song song theo thư mục con bằng `ThreadPoolExecutor`. fileciteturn0file0L344-L387  
-4. Đưa tiến trình/kết quả về GUI qua queue an toàn luồng. fileciteturn0file0L284-L309  
+- **Bytes** là dung lượng logic của file (`st_size`), không nhất thiết bằng dung lượng cấp phát thực tế trên đĩa.
+- Trên Windows, công cụ có dùng tiền tố `\\?\` để hỗ trợ đường dẫn rất dài tốt hơn.
+- Không follow symlink.
 
-## CSV Output
+## Định dạng CSV
 
-Các cột trong CSV theo thứ tự: fileciteturn0file0L311-L327
+File CSV xuất ra gồm:
 
-- `folder`
-- `bytes`
-- `human_readable`
-- `absolute_path`
+| Cột | Ý nghĩa |
+|---|---|
+| `folder` | Tên thư mục con (basename) |
+| `bytes` | Tổng dung lượng (bytes) |
+| `human_readable` | Dung lượng dạng KB/MB/GB/... |
+| `absolute_path` | Đường dẫn đầy đủ |
 
-## Đóng gói (PyInstaller)
+## Build file chạy độc lập (PyInstaller)
 
-### Windows (EXE)
+> Tuỳ chọn. Chỉ cần nếu bạn muốn đóng gói ứng dụng.
+
+### Windows (EXE một file)
 
 ```powershell
 py -3 -m pip install pyinstaller
@@ -70,29 +99,26 @@ py -3 -m PyInstaller --noconfirm --clean --onefile --windowed `
 
 ```bash
 python3 -m pip install pyinstaller
-python3 -m PyInstaller --noconfirm --clean --windowed --name SizeFolderGUI \
+python3 -m PyInstaller --noconfirm --clean --windowed \
+  --name SizeFolderGUI \
   --icon ./nct_logo.icns \
   --add-data "nct_logo.png:." \
   size_folder_gui_gui_v1.py
 ```
 
-## Branding
+Ghi chú:
+- Lần chạy đầu trên macOS có thể bị Gatekeeper chặn; dùng right‑click → Open.
+- Nếu phát hành rộng rãi, nên codesign và notarize.
 
-- Icon runtime: `nct_logo.png` fileciteturn0file0L23-L35  
-- Màu theme nằm ở phần constants đầu file. fileciteturn0file0L17-L28  
+## Liên kết dự án
 
-### Website
-
-Website chính thức: **www.pharmapp.dev**.
-
-Nếu muốn footer trong app hiển thị đúng website mới, chỉnh chuỗi footer trong code:
-
-- `self.var_footer = "... | www.pharmapp.dev"` (footer ở Scan tab). fileciteturn0file0L254-L258  
+- Sản phẩm / demo: **www.pharmapp.dev**
+- Bài viết & tài liệu: **www.nghiencuuthuoc.com**
 
 ## License
 
-Bạn có thể chọn license (ví dụ MIT) và thêm file `LICENSE` sau.
+Bạn có thể chọn:
+- MIT (khuyến nghị cho tiện ích mã nguồn mở), hoặc
+- Proprietary / chỉ dùng nội bộ
 
----
-
-© 2026 | PharmApp | www.pharmapp.dev | www.nghiencuuthuoc.com
+Nếu chọn MIT, hãy thêm file `LICENSE` ở thư mục gốc repo.
